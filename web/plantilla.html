@@ -1,0 +1,217 @@
+<title>Precio Bulto</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: etiqueta de góndola. Barra de búsqueda fija arriba, filtros en una fila, lista de etiquetas de precio debajo. */
+:root{
+  --papel:#FBFBF8; --tinta:#17222E; --tinta-2:#55606B; --linea:#DDDFD9; --superficie:#FFFFFF;
+  --etiqueta:#F5C518; --etiqueta-tinta:#2B2200; --ahorro:#1D7A46; --ahorro-fondo:#E3F2E8; --aviso:#9A5B00; --aviso-fondo:#FBEFD9;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif; --f-texto:"Barlow",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --papel:#12171D; --tinta:#E9ECEE; --tinta-2:#A3ACB4; --linea:#2B333C; --superficie:#1A2129;
+  --etiqueta:#E9BA12; --etiqueta-tinta:#1F1800; --ahorro:#5CC88A; --ahorro-fondo:#183526; --aviso:#E7A94A; --aviso-fondo:#3A2A10; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --papel:#12171D; --tinta:#E9ECEE; --tinta-2:#A3ACB4; --linea:#2B333C; --superficie:#1A2129;
+  --etiqueta:#E9BA12; --etiqueta-tinta:#1F1800; --ahorro:#5CC88A; --ahorro-fondo:#183526; --aviso:#E7A94A; --aviso-fondo:#3A2A10; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--papel);color:var(--tinta);font-family:var(--f-texto);font-size:16px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--papel)}
+.envoltura{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+header.marca{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:6px}
+.logo{font-family:var(--f-display);font-weight:700;font-size:2.1rem;letter-spacing:.01em;line-height:1;text-transform:uppercase}
+.logo span{background:var(--etiqueta);color:var(--etiqueta-tinta);padding:0 .18em;border-radius:3px}
+.bajada{color:var(--tinta-2);margin:0;max-width:62ch;text-wrap:balance}
+.estado{font-size:.82rem;color:var(--tinta-2);margin:4px 0 16px}
+.barra{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--papel);padding-block:10px;border-bottom:1px solid var(--linea);display:grid;gap:10px}
+#buscar{width:100%;font:inherit;font-size:1.05rem;padding:12px 14px;border:1.5px solid var(--linea);border-radius:8px;background:var(--superficie);color:var(--tinta)}
+#buscar:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid var(--etiqueta);outline-offset:2px}
+.controles{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.modo{display:inline-flex;border:1.5px solid var(--tinta);border-radius:8px;overflow:hidden}
+.modo button{font:inherit;font-weight:600;font-size:.9rem;padding:8px 12px;border:0;background:transparent;color:var(--tinta);cursor:pointer}
+.modo button[aria-pressed="true"]{background:var(--tinta);color:var(--papel)}
+select{font:inherit;font-size:.9rem;padding:8px 10px;border:1.5px solid var(--linea);border-radius:8px;background:var(--superficie);color:var(--tinta)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+.chip{flex:0 0 auto;font:inherit;font-size:.85rem;padding:5px 11px;border-radius:999px;border:1px solid var(--linea);background:var(--superficie);color:var(--tinta);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--etiqueta);border-color:var(--etiqueta);color:var(--etiqueta-tinta);font-weight:600}
+h2{font-family:var(--f-display);font-weight:700;font-size:1.45rem;text-transform:uppercase;letter-spacing:.02em;margin:28px 0 4px;text-wrap:balance}
+.h2-nota{color:var(--tinta-2);font-size:.9rem;margin:0 0 12px}
+.duelos{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.duelo{background:var(--superficie);border:1px solid var(--linea);border-radius:10px;padding:14px;display:grid;gap:8px;min-width:0}
+.duelo h3{margin:0;font-size:1rem;font-weight:600}
+.fila{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums;align-items:baseline}
+.fila.gana{font-weight:600}
+.fila .cad{color:var(--tinta-2)}
+.fila.gana .cad{color:var(--tinta)}
+.dif{font-size:.85rem;color:var(--ahorro);background:var(--ahorro-fondo);border-radius:6px;padding:3px 8px;justify-self:start}
+.lista{display:grid;gap:10px}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;background:var(--superficie);border:1px solid var(--linea);border-radius:10px;padding:12px 14px}
+.nombre{font-weight:600;margin:0;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.82rem;color:var(--tinta-2)}
+.tag{font-size:.75rem;font-weight:600;padding:2px 7px;border-radius:5px;letter-spacing:.02em}
+.tag.cadena{border:1px solid var(--linea);color:var(--tinta)}
+.tag.bulto{background:var(--ahorro-fondo);color:var(--ahorro)}
+.tag.oferta{background:var(--aviso-fondo);color:var(--aviso)}
+.precio{grid-row:1/3;grid-column:2;text-align:right;align-self:center;font-variant-numeric:tabular-nums}
+.precio .grande{font-family:var(--f-display);font-weight:700;font-size:1.85rem;line-height:1;display:block}
+.precio .chico{font-size:.8rem;color:var(--tinta-2);display:block}
+.precio .kilo{font-size:.9rem;font-weight:600;display:block;margin-top:3px}
+.item a{color:var(--tinta-2);font-size:.8rem}
+.vacio{padding:24px;text-align:center;color:var(--tinta-2);border:1px dashed var(--linea);border-radius:10px}
+#mas{font:inherit;font-weight:600;margin:14px auto 0;display:block;padding:10px 18px;border-radius:8px;border:1.5px solid var(--tinta);background:transparent;color:var(--tinta);cursor:pointer}
+footer{margin-top:36px;font-size:.82rem;color:var(--tinta-2);display:grid;gap:6px;max-width:70ch}
+@media (max-width:480px){.precio .grande{font-size:1.55rem}.logo{font-size:1.8rem}}
+</style>
+
+<div class="envoltura">
+  <header class="marca">
+    <div class="logo">Precio <span>Bulto</span></div>
+    <p class="bajada">Comparador de precios mayoristas. Precio por unidad, por bulto cerrado y por kilo o litro.</p>
+  </header>
+  <p class="estado" id="estado"></p>
+
+  <div class="barra">
+    <input id="buscar" type="search" placeholder="Buscá un producto: yerba, aceite, Marolio…" autocomplete="off" aria-label="Buscar producto">
+    <div class="controles">
+      <div class="modo" role="group" aria-label="Cómo comprás">
+        <button type="button" id="m-unidad" aria-pressed="false">Compro por unidad</button>
+        <button type="button" id="m-bulto" aria-pressed="true">Compro el bulto</button>
+      </div>
+      <select id="orden" aria-label="Ordenar">
+        <option value="kilo">Más barato por kg / litro</option>
+        <option value="precio">Más barato por unidad</option>
+        <option value="nombre">Nombre A-Z</option>
+      </select>
+      <select id="cadena" aria-label="Cadena">
+        <option value="">Todas las cadenas</option>
+      </select>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Categorías"></div>
+  </div>
+
+  <section id="sec-duelos">
+    <h2>Mismo producto, distinta cadena</h2>
+    <p class="h2-nota">Productos idénticos encontrados en más de un mayorista. Se compara el mejor precio por unidad de cada uno.</p>
+    <div class="duelos" id="duelos"></div>
+  </section>
+
+  <section>
+    <h2 id="titulo-lista">Todos los productos</h2>
+    <p class="h2-nota" id="nota-lista"></p>
+    <div class="lista" id="lista"></div>
+    <button type="button" id="mas" hidden>Ver más productos</button>
+  </section>
+
+  <footer>
+    <div><strong>Prototipo.</strong> Los precios se toman de las páginas públicas de cada cadena y pueden variar en la sucursal. Confirmá antes de comprar.</div>
+    <div>Maxiconsumo: precios de la web (sucursal Moreno), con IVA. El precio de bulto vale comprando el bulto cerrado. Yaguar: ofertas de la semana publicadas para la sucursal Parque Avellaneda.</div>
+  </footer>
+</div>
+
+<script>
+const DATOS = /*DATOS*/null;
+const $ = s => document.querySelector(s);
+const fmt = n => n == null ? "—" : "$ " + n.toLocaleString("es-AR", {minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2});
+const sinAcento = t => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const estado = {q: "", modo: "bulto", orden: "kilo", cadena: "", cat: "", limite: 40};
+try { const g = JSON.parse(localStorage.getItem("pb-pref") || "{}"); if (g.modo) estado.modo = g.modo; } catch (e) {}
+
+const prods = DATOS.productos.map(p => ({...p, busq: sinAcento(p.nombre + " " + p.categoria + " " + p.cadena)}));
+const precioSegunModo = p => estado.modo === "bulto" && p.precio_bulto_por_unidad ? p.precio_bulto_por_unidad : p.precio_unidad;
+const kiloSegunModo = p => estado.modo === "bulto" && p.precio_medida_bulto ? p.precio_medida_bulto : p.precio_medida_unidad;
+
+function fechaCorta(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("es-AR", {day: "numeric", month: "long"}) + " a las " + d.toLocaleTimeString("es-AR", {hour: "2-digit", minute: "2-digit"});
+}
+$("#estado").textContent = `${prods.length} productos de ${Object.keys(DATOS.fechas_por_cadena).length} mayoristas · actualizado el ${fechaCorta(DATOS.actualizado)}`;
+
+const cadenas = [...new Set(prods.map(p => p.cadena))];
+cadenas.forEach(c => $("#cadena").insertAdjacentHTML("beforeend", `<option value="${c}">${c}</option>`));
+const conteo = {};
+prods.forEach(p => conteo[p.categoria] = (conteo[p.categoria] || 0) + 1);
+const cats = Object.keys(conteo).filter(c => c !== "Otros").sort((a, b) => conteo[b] - conteo[a]);
+if (conteo.Otros) cats.push("Otros");
+$("#chips").innerHTML = [`<button type="button" class="chip" data-cat="" aria-pressed="true">Todo</button>`]
+  .concat(cats.map(c => `<button type="button" class="chip" data-cat="${c}" aria-pressed="false">${c}</button>`)).join("");
+
+function esc(t) { return String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c])); }
+
+function tarjeta(p) {
+  const precio = precioSegunModo(p), kilo = kiloSegunModo(p);
+  const usaBulto = estado.modo === "bulto" && p.precio_bulto_por_unidad;
+  const tags = [`<span class="tag cadena">${esc(p.cadena)}</span>`];
+  if (p.unidades_por_bulto && p.precio_bulto_por_unidad && p.precio_unidad) {
+    const ah = Math.round((1 - p.precio_bulto_por_unidad / p.precio_unidad) * 100);
+    tags.push(`<span class="tag bulto">Bulto x${p.unidades_por_bulto}: ${ah}% menos</span>`);
+  }
+  if (p.condicion) tags.push(`<span class="tag oferta">${esc(p.condicion)}</span>`);
+  let chico = "";
+  if (usaBulto) chico = `c/u en bulto · suelto ${fmt(p.precio_unidad)}`;
+  else if (p.precio_bulto_por_unidad) chico = `suelto · en bulto ${fmt(p.precio_bulto_por_unidad)}`;
+  else chico = "precio por unidad";
+  return `<article class="item">
+    <p class="nombre">${esc(p.nombre)}</p>
+    <div class="precio"><span class="grande">${fmt(precio)}</span><span class="chico">${chico}</span>${kilo ? `<span class="kilo">${fmt(kilo)} / ${p.medida}</span>` : ""}</div>
+    <div class="meta">${tags.join("")}<span>${esc(p.sucursal)}</span><a href="${esc(p.url)}" target="_blank" rel="noopener">Ver en la web</a></div>
+  </article>`;
+}
+
+function pintarDuelos() {
+  const grupos = {};
+  prods.forEach(p => (grupos[p.grupo] ||= []).push(p));
+  const duelos = Object.values(grupos).filter(g => g.length > 1 && new Set(g.map(p => p.cadena)).size > 1)
+    .filter(g => !estado.q || g.some(p => p.busq.includes(sinAcento(estado.q))));
+  $("#sec-duelos").hidden = !duelos.length;
+  $("#duelos").innerHTML = duelos.map(g => {
+    const filas = g.map(p => ({p, v: precioSegunModo(p)})).sort((a, b) => a.v - b.v);
+    const dif = Math.round((1 - filas[0].v / filas[filas.length - 1].v) * 100);
+    return `<div class="duelo"><h3>${esc(filas[0].p.nombre)}</h3>
+      ${filas.map((f, i) => `<div class="fila ${i === 0 ? "gana" : ""}"><span class="cad">${esc(f.p.cadena)}${f.p.condicion ? " · oferta" : estado.modo === "bulto" && f.p.precio_bulto_por_unidad ? " · en bulto" : ""}</span><span>${fmt(f.v)}</span></div>`).join("")}
+      ${dif > 0 ? `<span class="dif">En ${esc(filas[0].p.cadena)} ahorrás ${dif}%</span>` : `<span class="dif">Mismo precio</span>`}
+    </div>`;
+  }).join("");
+}
+
+function pintar() {
+  const q = sinAcento(estado.q.trim());
+  const palabras = q.split(/\s+/).filter(Boolean);
+  let r = prods.filter(p => (!estado.cadena || p.cadena === estado.cadena) && (!estado.cat || p.categoria === estado.cat) && palabras.every(w => p.busq.includes(w)));
+  const clave = {
+    kilo: p => kiloSegunModo(p) ?? Infinity,
+    precio: p => precioSegunModo(p) ?? Infinity,
+  }[estado.orden];
+  r.sort(clave ? (a, b) => clave(a) - clave(b) : (a, b) => a.nombre.localeCompare(b.nombre, "es"));
+  $("#titulo-lista").textContent = estado.cat || (q ? "Resultados" : "Todos los productos");
+  $("#nota-lista").textContent = r.length ? `${r.length} productos · precios ${estado.modo === "bulto" ? "comprando el bulto cerrado (cuando la cadena lo ofrece)" : "comprando suelto"}` : "";
+  $("#lista").innerHTML = r.length ? r.slice(0, estado.limite).map(tarjeta).join("") :
+    `<div class="vacio">No encontramos “${esc(estado.q)}”. Probá con una marca o un producto más general, por ejemplo “yerba” o “Marolio”.</div>`;
+  $("#mas").hidden = r.length <= estado.limite;
+  $("#mas").textContent = `Ver más productos (${r.length - estado.limite} restantes)`;
+  pintarDuelos();
+}
+
+function setModo(m) {
+  estado.modo = m;
+  $("#m-unidad").setAttribute("aria-pressed", m === "unidad");
+  $("#m-bulto").setAttribute("aria-pressed", m === "bulto");
+  try { localStorage.setItem("pb-pref", JSON.stringify({modo: m})); } catch (e) {}
+  pintar();
+}
+$("#m-unidad").onclick = () => setModo("unidad");
+$("#m-bulto").onclick = () => setModo("bulto");
+let t;
+$("#buscar").addEventListener("input", e => { clearTimeout(t); t = setTimeout(() => { estado.q = e.target.value; estado.limite = 40; pintar(); }, 120); });
+$("#orden").onchange = e => { estado.orden = e.target.value; pintar(); };
+$("#cadena").onchange = e => { estado.cadena = e.target.value; estado.limite = 40; pintar(); };
+$("#chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  estado.cat = b.dataset.cat; estado.limite = 40;
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c === b));
+  pintar();
+});
+$("#mas").onclick = () => { estado.limite += 40; pintar(); };
+setModo(estado.modo);
+</script>

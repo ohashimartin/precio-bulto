@@ -1,0 +1,10 @@
+{
+ "_ayuda": "Pares 'Cadena:SKU' que son el mismo producto (forzar) o que NO lo son (prohibir).",
+ "forzar": [
+  [
+   "Maxiconsumo:25143",
+   "Yaguar:71977,74127"
+  ]
+ ],
+ "prohibir": []
+}
